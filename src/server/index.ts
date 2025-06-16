@@ -65,6 +65,7 @@ export async function analyzeInteriorDesignStyles(
               
               The id should be a unique identifier for the image. Use a random UUID.
               The image_url should be ORIGINAL URL of the image (ex: '/public/image). Do not use a URL found  on the internet.
+              Try to aggregate the styles into a single style if possible (e.g. Japanese and Japanese Zen should be Japanese)
               Also, explain the reasoning behind the confidence score.`,
           },
           {
