@@ -113,14 +113,38 @@ export async function analyzeInteriorDesignStyles(
   }
 }
 
-// void (async () => {
-//   try {
-//     const results = await analyzeInteriorDesignStyles(JAPANESE_URLS);
-//     console.log("results", results);
-//   } catch (err) {
-//     console.error("error", err);
-//   }
-// })();
+export async function analyzeUserTasteProfile(
+  userTasteProfile: Record<string, number>,
+): Promise<string | null> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1",
+      messages: [
+        {
+          role: "developer",
+          content: `You are an expert interior designer that takes in a user's taste profile where the taste
+            is assigned a weight. You are to determine the user's taste profile based off that weight and output
+            a message to the user that describes their taste.`,
+        },
+        {
+          role: "user",
+          content: `Analyze my taste profile and give me a fully comprehensive description of what interior desing styles I like.
+            ${JSON.stringify(userTasteProfile)}
+            `,
+        },
+      ],
+    });
+
+    if (!response.choices[0]) {
+      throw new Error("No response from LLM");
+    }
+
+    return response.choices[0].message.content;
+  } catch (error) {
+    throw error;
+  }
+}
+
 interface User {
   id: string;
   tasteProfile: Record<string, number>;
@@ -180,6 +204,18 @@ app.get("/determine-profile/:userId", async (req, res) => {
   const profile = await determineTasteProfileForUser(userId);
   res.send(profile);
 });
+
+app.get("/get-taste-profile/:userId", async (req, res) => {
+  const user = findUser(req.params.userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const tasteProfile = await analyzeUserTasteProfile(user.tasteProfile);
+  res.send(tasteProfile);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port, ${PORT}`);
 });
