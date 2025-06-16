@@ -1,16 +1,22 @@
 import OpenAI from "openai";
 import { JAPANESE_URLS } from "../data/seed";
 import express from "express";
+import fs from "fs";
+import mime from "mime";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 /*
 
 PLAN
 Add a bunch of image linkts to images.ts
-Create a function that takes those images and puts them into gpt-4o to generate a json object of the image that breaks down the
-  interior design styles
+Create a function that takes those images and puts them into gpt to generate a json object of the image that breaks down the
+  interior design styles. throw that into a local file
 
-Put the outputted data into the DB
+DO NOT have DB for now.
+
+After creating JSON, create a seed user that likes specific images to test it.
+
+After, create the UI to do one shot analyses. 
 
 */
 
@@ -30,10 +36,15 @@ interface StyleAnalysis {
 
 export async function analyzeInteriorDesignStyles(
   imageUrls: string[],
-): Promise<StyleAnalysis[]> {
-  const results: StyleAnalysis[] = [];
+): Promise<void> {
+  const data: StyleAnalysis[] = [];
   for (const url of imageUrls) {
     try {
+      const mimeType = mime.getType(url);
+      const imageData = fs.readFileSync(url);
+      const base64Image = imageData.toString("base64");
+      const imageUrl = `data:${mimeType};base64,${base64Image}`;
+      console.log("Analyzing image: ", url);
       const response = await openai.chat.completions.create({
         model: "gpt-4.1",
         messages: [
@@ -50,9 +61,12 @@ export async function analyzeInteriorDesignStyles(
                 style: string,
                 elements: string[],
                 confidence: number
-              }`,
+              }.
+              
+              The id should be a unique identifier for the image. Use a random UUID.
+              The image_url should be ORIGINAL URL of the image (ex: '/public/image). Do not use a URL found  on the internet.
+              Also, explain the reasoning behind the confidence score.`,
           },
-
           {
             role: "user",
             content: [
@@ -63,7 +77,7 @@ export async function analyzeInteriorDesignStyles(
               {
                 type: "image_url",
                 image_url: {
-                  url,
+                  url: imageUrl,
                 },
               },
             ],
@@ -78,20 +92,35 @@ export async function analyzeInteriorDesignStyles(
         const analysis = JSON.parse(
           response.choices[0].message.content,
         ) as StyleAnalysis;
-        results.push(analysis);
+
+        data.push(analysis);
+
+        console.log("Finished analyzing image: ", url);
+        console.log("Analysis: ", response.choices[0].message.content);
+        console.log("--------------------------------");
       }
     } catch (error) {
       throw error;
     }
+
+    fs.writeFileSync("styleResults.json", JSON.stringify(data, null, 2));
   }
-  return results;
 }
 
-void (async () => {
-  try {
-    const results = await analyzeInteriorDesignStyles(JAPANESE_URLS);
-    console.log("results", results);
-  } catch (err) {
-    console.error("error", err);
-  }
-})();
+// void (async () => {
+//   try {
+//     const results = await analyzeInteriorDesignStyles(JAPANESE_URLS);
+//     console.log("results", results);
+//   } catch (err) {
+//     console.error("error", err);
+//   }
+// })();
+
+app.get("/", async (req, res) => {
+  await analyzeInteriorDesignStyles(JAPANESE_URLS);
+  res.send("Finished");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port, ${PORT}`);
+});
