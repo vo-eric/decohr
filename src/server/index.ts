@@ -1,5 +1,10 @@
 import OpenAI from "openai";
-import { JAPANESE_URLS } from "../data/seed";
+import {
+  DUMMY_IMAGE_RESULTS,
+  DUMMY_LIKES,
+  DUMMY_USERS,
+  JAPANESE_URLS,
+} from "../data/seed";
 import express from "express";
 import fs from "fs";
 import mime from "mime";
@@ -116,12 +121,65 @@ export async function analyzeInteriorDesignStyles(
 //     console.error("error", err);
 //   }
 // })();
+interface User {
+  id: string;
+  tasteProfile: Record<string, number>;
+}
+
+export function findUser(userId: string): User | undefined {
+  return DUMMY_USERS.find((user) => user.id === userId);
+}
+
+export function aggregateUserLikes(userId: string) {
+  const userLikes = DUMMY_LIKES.filter((like) => like.userId === userId);
+  const totalLikes: Record<string, number> = {};
+
+  for (const like of userLikes) {
+    const image = DUMMY_IMAGE_RESULTS.find(
+      (image) => image.id === like.imageId,
+    );
+    const styles = image?.styles;
+
+    if (!styles) {
+      return;
+    }
+
+    for (const style of styles) {
+      totalLikes[style.style] =
+        (totalLikes[style.style] ?? 0) + 1 * style.confidence;
+    }
+  }
+
+  return totalLikes;
+}
+
+export async function determineTasteProfileForUser(userId: string) {
+  const user = findUser(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const aggregateLikes = aggregateUserLikes(user.id);
+
+  return aggregateLikes;
+}
 
 app.get("/", async (req, res) => {
   await analyzeInteriorDesignStyles(JAPANESE_URLS);
   res.send("Finished");
 });
 
+app.get("/determine-profile/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  const user = findUser(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const profile = await determineTasteProfileForUser(userId);
+  res.send(profile);
+});
 app.listen(PORT, () => {
   console.log(`Server is running on port, ${PORT}`);
 });
