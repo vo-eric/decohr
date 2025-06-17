@@ -1,11 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { type ImageResult } from "~/data/seed";
 import Image from "next/image";
 import { Heart, HeartOff } from "lucide-react";
+import { trpc } from "~/app/_trpc/client";
 
-export function ImageRatingPage(initialImages: ImageResult[]) {
+/*
+
+
+
+
+const fetchImages = async (userId: string): Promise<ImageResult[]> => {
+  const images = await trpc.getImages.query(userId);
+  return images;
+};
+
+
+  const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
+  const images: ImageResult[] = await fetchImages(userId);
+
+
+*/
+
+export function ImageRatingPage() {
+  const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
+  const { data: images, isPending } = trpc.getImages.useQuery(userId);
   /*
 
   For now, just put the image results in a map where the key is the id and the value is the whole result
@@ -15,12 +34,20 @@ export function ImageRatingPage(initialImages: ImageResult[]) {
     
 
   */
-  const [images, setImages] = useState<ImageResult[]>(initialImages);
+
   const [index, setIndex] = useState(0);
-  const image = images[index];
+  const image = images?.[index];
+
+  /*
+
+  handeclick
+    if index == 15
+      trpc.getimages.useQuery(userId)
+
+  */
 
   //NOTE: hardcoded user for now
-  const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
+
   /*
 
   we don't need to map over all images since it'll just be showing one at a time
@@ -54,8 +81,11 @@ export function ImageRatingPage(initialImages: ImageResult[]) {
     setIndex((prev) => prev + 1);
   }
 
+  if (isPending) {
+    return <div>Fetching images...</div>;
+  }
+
   if (!image) {
-    //TODO: add button to fetch images
     return <div>No image found</div>;
   }
   return (
@@ -80,7 +110,7 @@ export function ImageRatingPage(initialImages: ImageResult[]) {
         </button>
         <button
           onClick={() => handleClick(userId, image.id, true)}
-          disabled={index === images.length - 1}
+          disabled={index === images?.length - 1}
         >
           <Heart />
         </button>
