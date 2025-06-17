@@ -5,6 +5,15 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "decohr.s3.us-east-2.amazonaws.com",
+      },
+    ],
+  },
+};
 
 export default config;

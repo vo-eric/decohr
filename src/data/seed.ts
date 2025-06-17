@@ -6,10 +6,23 @@ export const JAPANESE_URLS = [
   "./public/photo-1646200436473-53829a7cec37.webp",
 ];
 
-export const DUMMY_IMAGE_RESULTS = [
+export interface ImageStyle {
+  style: string;
+  elements: string[];
+  confidence: number;
+}
+export interface ImageResult {
+  id: string;
+  imageUrl: string;
+  styles: ImageStyle[];
+  reasoning?: string | string[] | null | undefined;
+}
+
+export const DUMMY_IMAGE_RESULTS: ImageResult[] = [
   {
     id: "7ae6a8be-eb13-4c8b-851f-9c8716c95d60",
-    image_url: "/public/image",
+    imageUrl:
+      "https://decohr.s3.us-east-2.amazonaws.com/Natural-Lighting-and-Soft-Ambiance.webp",
     styles: [
       {
         style: "Japanese",
@@ -51,7 +64,8 @@ export const DUMMY_IMAGE_RESULTS = [
   },
   {
     id: "e011e01c-218e-477b-9ecd-837af80b7dbf",
-    image_url: "/public/image",
+    imageUrl:
+      "https://decohr.s3.us-east-2.amazonaws.com/Focus-on-Minimalism.webp",
     styles: [
       {
         style: "Japanese",
@@ -81,7 +95,8 @@ export const DUMMY_IMAGE_RESULTS = [
   },
   {
     id: "b41c6a4b-4bc2-4a17-9042-c85b9bb4f9e7",
-    image_url: "/public/image",
+    imageUrl:
+      "https://decohr.s3.us-east-2.amazonaws.com/Copie_de_Nouvelle_image_blog__2500_x_1306_px___6__16+(1).webp",
     styles: [
       {
         style: "Japanese",
@@ -119,7 +134,7 @@ export const DUMMY_IMAGE_RESULTS = [
         confidence: 0.55,
       },
     ],
-    confidence_reasoning: [
+    reasoning: [
       "The dominance of tatami mats, shoji screens, and the overall layout are quintessentially Japanese, leading to very high confidence in the Japanese style.",
       "The open, uncluttered nature and simplicity of the space strongly align with Minimalist principles, thus resulting in a high confidence score.",
       "While there are overlapping features with Scandinavian style (light wood, bright and airy feel), the distinctively Japanese elements are more prominent, resulting in a moderate confidence for Scandinavian influences.",
@@ -127,7 +142,8 @@ export const DUMMY_IMAGE_RESULTS = [
   },
   {
     id: "a6fbc546-22aa-418e-a667-8e91bb2f2090",
-    image_url: "/public/image",
+    imageUrl:
+      "https://us-east-2.console.aws.amazon.com/s3/object/decohr?region=us-east-2&bucketType=general&prefix=pexels-photo-5461586.webp",
     styles: [
       {
         style: "Japanese",
@@ -158,7 +174,8 @@ export const DUMMY_IMAGE_RESULTS = [
   },
   {
     id: "b8577c70-96eb-46f0-ba42-fc079dca3e22",
-    image_url: "/public/image",
+    imageUrl:
+      "https://decohr.s3.us-east-2.amazonaws.com/photo-1646200436473-53829a7cec37.webp",
     styles: [
       {
         style: "Japanese",
