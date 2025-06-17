@@ -1,15 +1,11 @@
-import z from "zod";
-import { publicProcedure, router } from "./trpc";
-import { DecohrAPI } from "./db/db";
+import { router } from "./trpc";
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-
-const api = new DecohrAPI();
+import { imageRouter } from "./routers/images";
+import { likeRouter } from "./routers/likes";
 
 export const appRouter = router({
-  getImages: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const images = await api.getImageProfiles(input);
-    return images;
-  }),
+  images: imageRouter,
+  likes: likeRouter,
 });
 
 export type AppRouter = typeof appRouter;

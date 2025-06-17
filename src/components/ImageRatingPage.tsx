@@ -24,7 +24,12 @@ const fetchImages = async (userId: string): Promise<ImageResult[]> => {
 
 export function ImageRatingPage() {
   const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
-  const { data: images, isPending } = trpc.getImages.useQuery(userId);
+  const { data: images, isPending } = trpc.images.getImages.useQuery(userId);
+  const recordResponse = trpc.likes.recordImageResponse.useMutation({
+    onSuccess: () => {
+      setIndex((prev) => prev + 1);
+    },
+  });
   /*
 
   For now, just put the image results in a map where the key is the id and the value is the whole result
@@ -61,14 +66,7 @@ export function ImageRatingPage() {
     imageId: string,
     isLiked: boolean,
   ) {
-    const response = await fetch("/api/like", {
-      method: "POST",
-      body: JSON.stringify({ userId, imageId, isLiked }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to like image");
-    }
+    recordResponse.mutate({ userId, imageId, isLiked });
 
     //if image is near the end the array, fetch more images
 
@@ -77,8 +75,6 @@ export function ImageRatingPage() {
     //   const newImages = await response.json();
     //   setImages((prev) => [...prev, ...newImages]);
     // }
-
-    setIndex((prev) => prev + 1);
   }
 
   if (isPending) {
@@ -102,16 +98,10 @@ export function ImageRatingPage() {
         />
       </div>
       <div className="flex justify-between">
-        <button
-          onClick={() => handleClick(userId, image.id, false)}
-          disabled={index === 0}
-        >
+        <button onClick={() => handleClick(userId, image.id, false)}>
           <HeartOff />
         </button>
-        <button
-          onClick={() => handleClick(userId, image.id, true)}
-          disabled={index === images?.length - 1}
-        >
+        <button onClick={() => handleClick(userId, image.id, true)}>
           <Heart />
         </button>
       </div>
