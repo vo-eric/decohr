@@ -12,16 +12,25 @@ import { index, pgTableCreator } from "drizzle-orm/pg-core";
  */
 export const createTable = pgTableCreator((name) => `decohr_${name}`);
 
-export const posts = createTable(
-  "post",
-  (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
-    createdAt: d
-      .timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
-  }),
-  (t) => [index("name_idx").on(t.name)],
-);
+export const imageProfiles = createTable("image_profile", (d) => ({
+  id: d.uuid("id").primaryKey(),
+  imageUrl: d.text("image_url").notNull(),
+  styles: d.jsonb("styles").notNull(),
+  createdAt: d.timestamp("created_at").notNull().defaultNow(),
+  updatedAt: d.timestamp("updated_at").notNull().defaultNow(),
+  reasoning: d.text("reasoning"),
+}));
+
+export const users = createTable("user", (d) => ({
+  id: d.uuid("id").primaryKey(),
+  likes: d.jsonb("likes"),
+  tasteProfile: d.text("taste_profile"),
+  createdAt: d.timestamp("created_at").notNull().defaultNow(),
+}));
+
+export const likes = createTable("like", (d) => ({
+  id: d.uuid("id").primaryKey(),
+  userId: d.uuid("userId").references(() => users.id),
+  imageId: d.uuid("imageId").references(() => imageProfiles.id),
+  createdAt: d.timestamp("created_at").notNull().defaultNow(),
+}));
