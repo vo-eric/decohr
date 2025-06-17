@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { DUMMY_IMAGE_RESULTS, type ImageResult } from "~/data/seed";
+import { type ImageResult } from "~/data/seed";
 import Image from "next/image";
 import { Heart, HeartOff } from "lucide-react";
 
-export function ImageRatingPage() {
+export function ImageRatingPage(initialImages: ImageResult[]) {
   /*
 
   For now, just put the image results in a map where the key is the id and the value is the whole result
@@ -15,10 +15,12 @@ export function ImageRatingPage() {
     
 
   */
-  const seedImages = structuredClone(DUMMY_IMAGE_RESULTS);
-  const [images, setImages] = useState<ImageResult[]>(seedImages ?? []);
+  const [images, setImages] = useState<ImageResult[]>(initialImages);
   const [index, setIndex] = useState(0);
   const image = images[index];
+
+  //NOTE: hardcoded user for now
+  const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
   /*
 
   we don't need to map over all images since it'll just be showing one at a time
@@ -26,6 +28,31 @@ export function ImageRatingPage() {
     what happens when we fetch more images? what to do about the images array?
       have state be a modulo of the number of images we're fetching at each batch?
   */
+
+  async function handleClick(
+    userId: string,
+    imageId: string,
+    isLiked: boolean,
+  ) {
+    const response = await fetch("/api/like", {
+      method: "POST",
+      body: JSON.stringify({ userId, imageId, isLiked }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to like image");
+    }
+
+    //if image is near the end the array, fetch more images
+
+    // if (index === images.length - 5) {
+    //   const response = await fetch("/api/images");
+    //   const newImages = await response.json();
+    //   setImages((prev) => [...prev, ...newImages]);
+    // }
+
+    setIndex((prev) => prev + 1);
+  }
 
   if (!image) {
     //TODO: add button to fetch images
@@ -46,13 +73,13 @@ export function ImageRatingPage() {
       </div>
       <div className="flex justify-between">
         <button
-          onClick={() => setIndex((prev) => prev - 1)}
+          onClick={() => handleClick(userId, image.id, false)}
           disabled={index === 0}
         >
           <HeartOff />
         </button>
         <button
-          onClick={() => setIndex((prev) => prev + 1)}
+          onClick={() => handleClick(userId, image.id, true)}
           disabled={index === images.length - 1}
         >
           <Heart />
