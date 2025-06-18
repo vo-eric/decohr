@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/postgres-js";
-import { imageProfiles, likes, users } from "./schema";
+import { generatedImages, imageProfiles, likes, users } from "./schema";
 import type { ImageResult, ImageStyle, User } from "~/data/seed";
 import { and, count, eq, inArray, not } from "drizzle-orm";
 import { analyzeInteriorDesignStyle } from "~/engine";
@@ -145,5 +145,19 @@ export class DecohrAPI {
         tasteProfile,
       })
       .where(eq(users.id, userId));
+  }
+
+  async addGeneratedImage(imageUrl: string, userId: string) {
+    const [image] = await this.db
+      .insert(generatedImages)
+      .values({
+        id: crypto.randomUUID(),
+        imageUrl,
+        userId,
+        createdAt: new Date(),
+      })
+      .returning();
+
+    return image;
   }
 }

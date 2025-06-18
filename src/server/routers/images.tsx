@@ -25,6 +25,12 @@ export const imageRouter = router({
     )
     .mutation(async ({ input }) => {
       const image = await generateImage(input.tasteProfile, input.userId);
+
+      if (!image) {
+        return;
+      }
+
+      await api.addGeneratedImage(image, input.userId);
       return image;
     }),
 });
