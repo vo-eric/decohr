@@ -28,6 +28,7 @@
     "@trpc/next": "^11.4.1",
     "@trpc/react-query": "^11.4.1",
     "@trpc/server": "^11.4.1",
+    "clsx": "^2.1.1",
     "drizzle-orm": "^0.41.0",
     "lucide-react": "^0.516.0",
     "mime": "^4.0.7",
