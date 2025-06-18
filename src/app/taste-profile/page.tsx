@@ -5,17 +5,19 @@ import { useState } from "react";
 import Image from "next/image";
 
 export default function Page() {
+  const utils = trpc.useUtils();
   const { data: user } = trpc.users.getUser.useQuery({
     userId: "11f94639-ae67-42b4-85ee-fe6cd4e4ac87",
   });
   const tasteProfile = user?.tasteProfile;
   const likes = user?.likes as Record<string, number>;
-  const [images, setImages] = useState<string[]>([]);
+  const [index, setIndex] = useState(0);
+  const { data: generatedImages } = trpc.images.getGeneratedImages.useQuery(
+    user?.id ?? "",
+  );
   const generateImage = trpc.images.generateImage.useMutation({
-    onSuccess: (data) => {
-      if (data) {
-        setImages((prev) => [...prev, data]);
-      }
+    onSuccess: async () => {
+      await utils.images.getGeneratedImages.invalidate();
     },
   });
 
@@ -40,9 +42,9 @@ export default function Page() {
         Generate Image
       </button>
       <div className="relative h-[400px] w-auto">
-        {images[0] && (
+        {generatedImages?.length && (
           <Image
-            src={images[0]}
+            src={generatedImages[index]?.imageUrl ?? ""}
             alt="Generated Image"
             width={0}
             height={0}
@@ -52,6 +54,8 @@ export default function Page() {
           />
         )}
       </div>
+      <button onClick={() => setIndex(index - 1)}>Prev</button>
+      <button onClick={() => setIndex(index + 1)}>Next</button>
     </div>
   );
 }

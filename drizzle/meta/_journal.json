@@ -15,6 +15,13 @@
       "when": 1750178444646,
       "tag": "0001_awesome_firedrake",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1750261659073,
+      "tag": "0002_lovely_colossus",
+      "breakpoints": true
     }
   ]
 }
