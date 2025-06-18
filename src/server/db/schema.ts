@@ -32,5 +32,6 @@ export const likes = createTable("like", (d) => ({
   id: d.uuid("id").primaryKey(),
   userId: d.uuid("userId").references(() => users.id),
   imageId: d.uuid("imageId").references(() => imageProfiles.id),
+  isLiked: d.boolean("is_liked").notNull(),
   createdAt: d.timestamp("created_at").notNull().defaultNow(),
 }));
