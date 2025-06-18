@@ -91,7 +91,7 @@ export class DecohrAPI {
 
     for (const style of styles) {
       updatedLikes[style.style] =
-        updatedLikes[style.style] ?? 0 + 1 * style.confidence;
+        (updatedLikes[style.style] ?? 0) + 1 * style.confidence;
     }
 
     await this.db
