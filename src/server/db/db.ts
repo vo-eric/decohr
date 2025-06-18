@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { imageProfiles, likes, users } from "./schema";
 import type { ImageResult, ImageStyle, User } from "~/data/seed";
-import { eq, inArray, not } from "drizzle-orm";
+import { and, count, eq, inArray, not } from "drizzle-orm";
 import { analyzeInteriorDesignStyle } from "~/engine";
 
 export type LikesMap = Record<string, number>;
@@ -52,6 +52,15 @@ export class DecohrAPI {
       .returning();
 
     return like;
+  }
+
+  async getUserLikesCount(userId: string) {
+    const [totalLikes] = await this.db
+      .select({ count: count(likes.id) })
+      .from(likes)
+      .where(and(eq(likes.userId, userId), eq(likes.isLiked, true)));
+
+    return totalLikes?.count ?? 0;
   }
 
   async updateUserLikes(userId: string, imageId: string, isLiked: boolean) {
@@ -108,18 +117,33 @@ export class DecohrAPI {
 
   async analyzeImages(imageUrls: string[]) {
     for (const imageUrl of imageUrls) {
-      console.log("--------------------------------");
-      console.log("imageurl", imageUrl);
-      console.log("--------------------------------");
       const result = await analyzeInteriorDesignStyle(imageUrl);
       await this.db.insert(imageProfiles).values({
         id: crypto.randomUUID(),
         imageUrl: imageUrl,
         createdAt: new Date(),
         updatedAt: new Date(),
-        styles: JSON.stringify(result.styles),
-        reasoning: JSON.stringify(result.reasoning),
+        styles: JSON.stringify(result?.styles),
+        reasoning: JSON.stringify(result?.reasoning),
       });
     }
+  }
+
+  async getUser(userId: string) {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    return user;
+  }
+
+  async updateUserTasteProfile(userId: string, tasteProfile: string) {
+    await this.db
+      .update(users)
+      .set({
+        tasteProfile,
+      })
+      .where(eq(users.id, userId));
   }
 }
