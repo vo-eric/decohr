@@ -30,6 +30,7 @@ export function ImageRatingPage() {
       setIndex((prev) => prev + 1);
     },
   });
+  const updateUserLikes = trpc.users.updateUserLikes.useMutation();
   /*
 
   For now, just put the image results in a map where the key is the id and the value is the whole result
@@ -67,6 +68,7 @@ export function ImageRatingPage() {
     isLiked: boolean,
   ) {
     recordResponse.mutate({ userId, imageId, isLiked });
+    updateUserLikes.mutate({ userId, imageId, isLiked });
 
     //if image is near the end the array, fetch more images
 

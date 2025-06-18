@@ -1,7 +1,10 @@
 import { drizzle } from "drizzle-orm/postgres-js";
-import { imageProfiles, likes } from "./schema";
-import type { ImageResult, ImageStyle } from "~/data/seed";
+import { imageProfiles, likes, users } from "./schema";
+import type { ImageResult, ImageStyle, User } from "~/data/seed";
 import { eq, inArray, not } from "drizzle-orm";
+import { analyzeInteriorDesignStyle } from "~/engine";
+
+export type LikesMap = Record<string, number>;
 
 export class DecohrAPI {
   private db = drizzle(process.env.DATABASE_URL!);
@@ -51,11 +54,67 @@ export class DecohrAPI {
     return like;
   }
 
+  async updateUserLikes(userId: string, imageId: string, isLiked: boolean) {
+    if (!isLiked) {
+      return;
+    }
+
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const [image] = await this.db
+      .select()
+      .from(imageProfiles)
+      .where(eq(imageProfiles.id, imageId));
+
+    if (!image) {
+      throw new Error("Image not found");
+    }
+
+    const styles = image.styles as ImageStyle[];
+    const updatedLikes = (user.likes ?? {}) as Record<string, number>;
+
+    for (const style of styles) {
+      updatedLikes[style.style] =
+        updatedLikes[style.style] ?? 0 + 1 * style.confidence;
+    }
+
+    await this.db
+      .update(users)
+      .set({
+        likes: updatedLikes,
+      })
+      .where(eq(users.id, userId));
+  }
+
   async addImageProfile(results: ImageResult[]) {
     for (const result of results) {
       await this.db.insert(imageProfiles).values({
         id: result.id,
         imageUrl: result.imageUrl,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        styles: JSON.stringify(result.styles),
+        reasoning: JSON.stringify(result.reasoning),
+      });
+    }
+  }
+
+  async analyzeImages(imageUrls: string[]) {
+    for (const imageUrl of imageUrls) {
+      console.log("--------------------------------");
+      console.log("imageurl", imageUrl);
+      console.log("--------------------------------");
+      const result = await analyzeInteriorDesignStyle(imageUrl);
+      await this.db.insert(imageProfiles).values({
+        id: crypto.randomUUID(),
+        imageUrl: imageUrl,
         createdAt: new Date(),
         updatedAt: new Date(),
         styles: JSON.stringify(result.styles),
