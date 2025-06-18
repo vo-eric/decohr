@@ -10,6 +10,12 @@ export const imageRouter = router({
     const images = await api.getImageProfiles(input);
     return images;
   }),
+  getGeneratedImages: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const images = await api.getGeneratedImages(input);
+      return images;
+    }),
   analyzeImages: publicProcedure
     .input(z.array(z.string()))
     .mutation(async ({ input }) => {

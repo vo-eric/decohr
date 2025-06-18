@@ -160,4 +160,13 @@ export class DecohrAPI {
 
     return image;
   }
+
+  async getGeneratedImages(userId: string) {
+    const images = await this.db
+      .select()
+      .from(generatedImages)
+      .where(eq(generatedImages.userId, userId));
+
+    return images;
+  }
 }
