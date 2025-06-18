@@ -17,4 +17,10 @@ export const userRouter = router({
       const response = await api.updateUserLikes(userId, imageId, isLiked);
       return response;
     }),
+  getUser: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ input: { userId } }) => {
+      const user = await api.getUser(userId);
+      return user;
+    }),
 });
