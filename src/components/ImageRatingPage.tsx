@@ -5,23 +5,6 @@ import Image from "next/image";
 import { Heart, HeartOff } from "lucide-react";
 import { trpc } from "~/app/_trpc/client";
 
-/*
-
-
-
-
-const fetchImages = async (userId: string): Promise<ImageResult[]> => {
-  const images = await trpc.getImages.query(userId);
-  return images;
-};
-
-
-  const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
-  const images: ImageResult[] = await fetchImages(userId);
-
-
-*/
-
 export function ImageRatingPage() {
   const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
   const { data: images, isPending } = trpc.images.getImages.useQuery(userId);
@@ -44,24 +27,6 @@ export function ImageRatingPage() {
   const [index, setIndex] = useState(0);
   const image = images?.[index];
 
-  /*
-
-  handeclick
-    if index == 15
-      trpc.getimages.useQuery(userId)
-
-  */
-
-  //NOTE: hardcoded user for now
-
-  /*
-
-  we don't need to map over all images since it'll just be showing one at a time
-  have state for the current image index?
-    what happens when we fetch more images? what to do about the images array?
-      have state be a modulo of the number of images we're fetching at each batch?
-  */
-
   async function handleClick(
     userId: string,
     imageId: string,
@@ -70,6 +35,7 @@ export function ImageRatingPage() {
     recordResponse.mutate({ userId, imageId, isLiked });
     updateUserLikes.mutate({ userId, imageId, isLiked });
 
+    //TODO
     //if image is near the end the array, fetch more images
 
     // if (index === images.length - 5) {
@@ -88,7 +54,7 @@ export function ImageRatingPage() {
   }
   return (
     <>
-      <div className="relative flex h-[60vh] w-full items-center justify-center overflow-hidden rounded-xl bg-[#e9edc9]/20">
+      <div className="relative flex h-[60vh] w-[60%] items-center justify-center overflow-hidden rounded-xl bg-[#87bba2]/20">
         <Image
           src={image.imageUrl}
           alt={image.styles[0]!.style}
@@ -99,12 +65,24 @@ export function ImageRatingPage() {
           className="object-contain"
         />
       </div>
-      <div className="flex justify-between">
-        <button onClick={() => handleClick(userId, image.id, false)}>
-          <HeartOff />
+      <div className="flex w-[20%] justify-between">
+        <button
+          className="cursor-pointer"
+          onClick={() => handleClick(userId, image.id, false)}
+        >
+          <HeartOff
+            size={36}
+            className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-black"
+          />
         </button>
-        <button onClick={() => handleClick(userId, image.id, true)}>
-          <Heart />
+        <button
+          className="cursor-pointer"
+          onClick={() => handleClick(userId, image.id, true)}
+        >
+          <Heart
+            size={36}
+            className="text-[#3b6064] transition duration-300 hover:rotate-35 hover:text-red-500"
+          />
         </button>
       </div>
     </>
