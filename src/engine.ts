@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import fs from "fs";
 import mime from "mime";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 export interface StyleAnalysis {
   id: string;
@@ -108,7 +109,18 @@ export async function analyzeUserTasteProfile(
   }
 }
 
-export async function generateImages(tasteProfile: Record<string, number>) {
+const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+export async function generateImage(
+  tasteProfile: Record<string, number>,
+  userId: string,
+) {
   const favoredStyles = getFavoredStyles(tasteProfile);
   const response = await openai.responses.create({
     model: "gpt-4.1-mini",
@@ -125,12 +137,22 @@ export async function generateImages(tasteProfile: Record<string, number>) {
 
   if (imageData.length > 0) {
     const imageBase64 = imageData[0];
+    const imageBuffer = Buffer.from(imageBase64 ?? "", "base64");
+    const fileName = `${userId}-${Date.now()}.png`;
 
-    if (imageBase64) {
-      fs.writeFileSync(
-        "user_taste_mockup.png",
-        Buffer.from(imageBase64, "base64"),
-      );
+    const uploadParams = {
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Key: `generated_images/${fileName}`,
+      Body: imageBuffer,
+      ContentType: "image/png",
+    };
+
+    try {
+      await s3.send(new PutObjectCommand(uploadParams));
+      return `https://${process.env.S3_BUCKET_NAME!}.s3.amazonaws.com/generated_images/${fileName}`;
+    } catch (error) {
+      console.error("Error uploading image to S3:", error);
+      throw error;
     }
   }
 }

@@ -10,6 +10,10 @@ const config = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "decohr.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
         hostname: "decohr.s3.us-east-2.amazonaws.com",
       },
     ],
