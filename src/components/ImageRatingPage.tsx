@@ -4,10 +4,16 @@ import { useState } from "react";
 import Image from "next/image";
 import { Heart, HeartOff } from "lucide-react";
 import { trpc } from "~/app/_trpc/client";
+import { useSession } from "~/lib/auth-client";
 
 export function ImageRatingPage() {
-  const userId = "11f94639-ae67-42b4-85ee-fe6cd4e4ac87";
-  const { data: images, isPending } = trpc.images.getImages.useQuery(userId);
+  const { data: session } = useSession();
+
+  const user = session?.user;
+
+  const { data: images, isPending } = trpc.images.getImages.useQuery(
+    user?.id ?? "",
+  );
   const recordResponse = trpc.likes.recordImageResponse.useMutation({
     onSuccess: () => {
       setIndex((prev) => prev + 1);
@@ -68,7 +74,7 @@ export function ImageRatingPage() {
       <div className="flex w-[20%] justify-between">
         <button
           className="cursor-pointer"
-          onClick={() => handleClick(userId, image.id, false)}
+          onClick={() => handleClick(user?.id ?? "", image.id, false)}
         >
           <HeartOff
             size={36}
@@ -77,7 +83,7 @@ export function ImageRatingPage() {
         </button>
         <button
           className="cursor-pointer"
-          onClick={() => handleClick(userId, image.id, true)}
+          onClick={() => handleClick(user?.id ?? "", image.id, true)}
         >
           <Heart
             size={36}
