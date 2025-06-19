@@ -70,6 +70,8 @@ export function ImageRatingPage({ userId }: { userId: string }) {
       <div className="flex w-[20%] justify-between">
         <button
           className="cursor-pointer"
+          name="dislike"
+          aria-label="Dislike"
           onClick={() => handleClick(user?.id ?? "", image.id, false)}
         >
           <HeartOff
@@ -79,7 +81,9 @@ export function ImageRatingPage({ userId }: { userId: string }) {
         </button>
         <button
           className="cursor-pointer"
+          name="like"
           onClick={() => handleClick(user?.id ?? "", image.id, true)}
+          aria-label="Like"
         >
           <Heart
             size={36}
