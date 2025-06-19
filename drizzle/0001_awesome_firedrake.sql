@@ -1,1 +1,0 @@
-ALTER TABLE "decohr_like" ADD COLUMN "is_liked" boolean NOT NULL;
