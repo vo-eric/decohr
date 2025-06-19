@@ -5,12 +5,18 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useSession } from "~/lib/auth-client";
+import ImageSkeleton from "~/components/image-skeleton";
+import TextSkeleton from "~/components/ui/text-skeleton";
 
 export default function Page() {
   const utils = trpc.useUtils();
+  const { data: session } = useSession();
+
   const { data: user } = trpc.users.getUser.useQuery({
-    userId: "11f94639-ae67-42b4-85ee-fe6cd4e4ac87",
+    userId: session?.user?.id ?? "",
   });
+
   const tasteProfile = user?.tasteProfile;
   const likes = user?.likes as Record<string, number>;
   const [index, setIndex] = useState(0);
@@ -21,7 +27,7 @@ export default function Page() {
   const generateImage = trpc.images.generateImage.useMutation({
     onSuccess: async () => {
       await utils.images.getGeneratedImages.invalidate();
-      setIndex(generatedImages!.length - 1);
+      setIndex(generatedImages!.length);
     },
   });
 
@@ -53,30 +59,39 @@ export default function Page() {
 
   async function handleGenerateImageClick() {
     generateImage.mutate({
-      userId: "11f94639-ae67-42b4-85ee-fe6cd4e4ac87",
+      userId: user?.id ?? "",
       tasteProfile: likes,
     });
   }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#c9e4ca]">
-      <div className="container grid h-full grid-cols-3 items-center justify-center gap-16">
-        <div className="col-span-1 flex h-full flex-1 flex-grow flex-col gap-8 self-start bg-[#c9e4ca] text-[#364958]">
+      <div className="container grid h-full max-h-[80vh] grid-cols-3 grid-rows-1 items-center justify-center gap-16">
+        <div className="col-span-1 flex h-full flex-1 flex-grow flex-col gap-6 self-start bg-[#c9e4ca] text-[#364958]">
           <h1 className="text-4xl font-bold">Your Taste Profile</h1>
-          <p className="leading-relaxed">{tasteProfile}</p>
-          <button
-            className={clsx(
-              "mt-auto cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#42656c]",
-              generateImage.isPending && "cursor-not-allowed",
-            )}
-            onClick={handleGenerateImageClick}
-          >
-            {generateImage.isPending ? "Generating..." : "Generate Image"}
-          </button>
+          {generatedImages && generatedImages.length > 0 ? (
+            <>
+              <p className="h-full max-h-[50vh] overflow-scroll leading-relaxed">
+                {tasteProfile}
+              </p>
+              <button
+                className={clsx(
+                  "mt-auto cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#42656c]",
+                  generateImage.isPending && "cursor-not-allowed",
+                )}
+                disabled={generateImage.isPending}
+                onClick={handleGenerateImageClick}
+              >
+                {generateImage.isPending ? "Generating..." : "Generate Image"}
+              </button>
+            </>
+          ) : (
+            <TextSkeleton />
+          )}
         </div>
         <div className="col-span-2 flex-2 rounded-2xl bg-[#87bba2]/20">
           <div className="relative h-[800px] w-auto">
-            {generatedImages?.length && (
+            {generatedImages && generatedImages.length > 0 ? (
               <Image
                 src={
                   generatedImages[Math.abs(index) % generatedImages.length]
@@ -92,19 +107,25 @@ export default function Page() {
                   isTransitioning ? "opacity-0" : "opacity-100",
                 )}
               />
+            ) : (
+              <ImageSkeleton />
             )}
-            <button
-              className="absolute flex h-full w-[40px] cursor-pointer items-center justify-center rounded-l-2xl transition duration-300 hover:bg-[#87bba2]/10"
-              onClick={() => handleClick(false)}
-            >
-              <ChevronLeftIcon className="h-12 w-12 text-[#55828b]" />
-            </button>
-            <button
-              className="absolute right-0 flex h-full w-[40px] cursor-pointer items-center justify-center rounded-r-2xl transition duration-300 hover:bg-[#87bba2]/10"
-              onClick={() => handleClick(true)}
-            >
-              <ChevronRightIcon className="h-12 w-12 text-[#55828b]" />
-            </button>
+            {generatedImages && generatedImages.length > 1 && (
+              <>
+                <button
+                  className="absolute flex h-full w-[40px] cursor-pointer items-center justify-center rounded-l-2xl transition duration-300 hover:bg-[#87bba2]/10"
+                  onClick={() => handleClick(false)}
+                >
+                  <ChevronLeftIcon className="h-12 w-12 text-[#55828b]" />
+                </button>
+                <button
+                  className="absolute right-0 flex h-full w-[40px] cursor-pointer items-center justify-center rounded-r-2xl transition duration-300 hover:bg-[#87bba2]/10"
+                  onClick={() => handleClick(true)}
+                >
+                  <ChevronRightIcon className="h-12 w-12 text-[#55828b]" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
