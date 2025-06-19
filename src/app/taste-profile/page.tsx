@@ -69,7 +69,7 @@ export default function Page() {
       <div className="container grid h-full max-h-[80vh] grid-cols-3 grid-rows-1 items-center justify-center gap-16">
         <div className="col-span-1 flex h-full flex-1 flex-grow flex-col gap-6 self-start bg-[#c9e4ca] text-[#364958]">
           <h1 className="text-4xl font-bold">Your Taste Profile</h1>
-          {generatedImages && generatedImages.length > 0 ? (
+          {user?.tasteProfile ? (
             <>
               <p className="h-full max-h-[50vh] overflow-scroll leading-relaxed">
                 {tasteProfile}
