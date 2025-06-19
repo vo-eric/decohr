@@ -13,8 +13,6 @@ export function NavAuthButton() {
     router.push("/login");
   };
 
-  console.log("sesh", session);
-
   if (!session) {
     return (
       <Button

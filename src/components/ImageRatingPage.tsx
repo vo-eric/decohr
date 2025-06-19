@@ -4,16 +4,11 @@ import { useState } from "react";
 import Image from "next/image";
 import { Heart, HeartOff } from "lucide-react";
 import { trpc } from "~/app/_trpc/client";
-import { useSession } from "~/lib/auth-client";
 
-export function ImageRatingPage() {
-  const { data: session } = useSession();
+export function ImageRatingPage({ userId }: { userId: string }) {
+  const { data: user } = trpc.users.getUser.useQuery({ userId });
 
-  const user = session?.user;
-
-  const { data: images, isPending } = trpc.images.getImages.useQuery(
-    user?.id ?? "",
-  );
+  const { data: images, isPending } = trpc.images.getImages.useQuery(userId);
   const recordResponse = trpc.likes.recordImageResponse.useMutation({
     onSuccess: () => {
       setIndex((prev) => prev + 1);
@@ -38,6 +33,7 @@ export function ImageRatingPage() {
     imageId: string,
     isLiked: boolean,
   ) {
+    console.log("handleClick", userId);
     recordResponse.mutate({ userId, imageId, isLiked });
     updateUserLikes.mutate({ userId, imageId, isLiked });
 

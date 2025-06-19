@@ -8,12 +8,14 @@ export default async function HomePage() {
     headers: new Headers(await headers()),
   });
 
-  console.log("session in main", session);
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#c9e4ca]">
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        {session ? <ImageRatingPage /> : <SplashPage />}
+        {session ? (
+          <ImageRatingPage userId={session.user.id} />
+        ) : (
+          <SplashPage />
+        )}
       </div>
     </main>
   );
