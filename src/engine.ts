@@ -124,8 +124,10 @@ export async function generateImage(
   const favoredStyles = getFavoredStyles(tasteProfile);
   const response = await openai.responses.create({
     model: "gpt-4.1-mini",
-    input: `Generate an image of a room that is dependent on the score. the higher the score, the more reflective the image should be of that.
-      Here is the favored styles: ${JSON.stringify(favoredStyles)}
+    input: `You are an expert interior designer that generates images of rooms based on a user's taste profile. You will be given an object of favored styles and you will
+    generate a lifelike image of a room that is dependent on the value of the style (eg: {Japanese: 4.7, Bohemian: 4.2}). The higher the value, the more reflective the image 
+    should be of that.
+    Here are the favored styles: ${JSON.stringify(favoredStyles)}. The image should be a room that is a mix of the favored styles.
       `,
     tools: [{ type: "image_generation" }],
   });
