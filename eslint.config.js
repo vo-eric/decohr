@@ -11,7 +11,6 @@ export default tseslint.config(
   {
     ignores: [".next"],
   },
-  ...compat.extends("next/core-web-vitals"),
   {
     files: ["**/*.ts", "**/*.tsx"],
     plugins: {
@@ -46,15 +45,13 @@ export default tseslint.config(
         "error",
         { drizzleObjectName: ["db", "ctx.db"] },
       ],
-    },
-  },
-  {
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
+      // Next.js specific rules
+      "@next/next/no-html-link-for-pages": "off",
+      "@next/next/no-img-element": "off",
     },
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        project: true,
       },
     },
   },
