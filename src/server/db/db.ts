@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/postgres-js";
-import { generatedImages, imageProfiles, likes, users } from "./schema";
+import { generatedImages, imageProfiles, likes, user } from "./schema";
 import type { ImageResult, ImageStyle, User } from "~/data/seed";
 import { and, count, eq, inArray, not } from "drizzle-orm";
 import { analyzeInteriorDesignStyle } from "~/engine";
@@ -68,12 +68,12 @@ export class DecohrAPI {
       return;
     }
 
-    const [user] = await this.db
+    const [userData] = await this.db
       .select()
-      .from(users)
-      .where(eq(users.id, userId));
+      .from(user)
+      .where(eq(user.id, userId));
 
-    if (!user) {
+    if (!userData) {
       throw new Error("User not found");
     }
 
@@ -87,7 +87,7 @@ export class DecohrAPI {
     }
 
     const styles = image.styles as ImageStyle[];
-    const updatedLikes = (user.likes ?? {}) as Record<string, number>;
+    const updatedLikes = (userData.likes ?? {}) as Record<string, number>;
 
     for (const style of styles) {
       updatedLikes[style.style] =
@@ -95,11 +95,11 @@ export class DecohrAPI {
     }
 
     await this.db
-      .update(users)
+      .update(user)
       .set({
         likes: updatedLikes,
       })
-      .where(eq(users.id, userId));
+      .where(eq(user.id, userId));
   }
 
   async addImageProfile(results: ImageResult[]) {
@@ -130,21 +130,21 @@ export class DecohrAPI {
   }
 
   async getUser(userId: string) {
-    const [user] = await this.db
+    const [userData] = await this.db
       .select()
-      .from(users)
-      .where(eq(users.id, userId));
+      .from(user)
+      .where(eq(user.id, userId));
 
-    return user;
+    return userData;
   }
 
   async updateUserTasteProfile(userId: string, tasteProfile: string) {
     await this.db
-      .update(users)
+      .update(user)
       .set({
         tasteProfile,
       })
-      .where(eq(users.id, userId));
+      .where(eq(user.id, userId));
   }
 
   async addGeneratedImage(imageUrl: string, userId: string) {
