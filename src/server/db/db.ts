@@ -1,10 +1,27 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { generatedImages, imageProfiles, likes, user } from "./schema";
-import type { ImageResult, ImageStyle, User } from "~/data/seed";
 import { and, count, eq, inArray, not } from "drizzle-orm";
 import { analyzeInteriorDesignStyle } from "~/engine";
 
 export type LikesMap = Record<string, number>;
+
+export interface ImageStyle {
+  style: string;
+  elements: string[];
+  confidence: number;
+}
+export interface ImageResult {
+  id: string;
+  imageUrl: string;
+  styles: ImageStyle[];
+  reasoning?: string | string[] | null | undefined;
+}
+
+export interface User {
+  id: string;
+  likes: Record<string, number> | null | undefined;
+  tasteProfile: string;
+}
 
 export class DecohrAPI {
   private db = drizzle(process.env.DATABASE_URL!);
