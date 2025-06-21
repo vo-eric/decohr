@@ -62,7 +62,7 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="grid h-[60vh] w-[60%] grid-cols-3 grid-rows-[40px_1fr] gap-4">
+    <div className="grid h-[60vh] w-[80%] grid-cols-3 grid-rows-[40px_1fr] gap-4">
       <div className="col-span-3 h-[60px]">
         <div
           className={clsx(
