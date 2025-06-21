@@ -81,7 +81,11 @@ export function ImageRatingPage({ userId }: { userId: string }) {
               className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
               onClick={handleGenerateClick}
             >
-              {user?.tasteProfile ? "Regenerate" : "Generate"}
+              {analyzeTasteProfile.isPending
+                ? "Generating..."
+                : user?.tasteProfile
+                  ? "Regenerate"
+                  : "Generate"}
             </button>
           </div>
         </div>
