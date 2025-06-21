@@ -4,7 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
@@ -123,3 +124,63 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* THIS IS SO FUCKING COOL */
+
+:root {
+  interpolate-size: allow-keywords;
+}
+
+details {
+  background-color: rgba(135, 187, 162, 0.2);
+
+  padding: 0.5rem 0;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  font-size: 1.25rem;
+}
+
+details * {
+  margin: 0;
+}
+
+details::details-content {
+  font-size: 1rem;
+  display: block;
+  margin-inline: 1.4rem;
+  block-size: 0;
+  transition-property: block-size 0.3s ease-in-out;
+  transition-duration: 0.3s;
+  transition-behavior: allow-discrete;
+}
+
+details[open]::details-content {
+  block-size: auto;
+  block-size: calc-size(auto, size);
+}
+
+summary {
+  padding-inline: 2rem;
+  position: relative;
+  cursor: pointer;
+}
+
+summary::marker {
+  content: "»";
+  content: none;
+}
+
+summary::before {
+  content: "»";
+  position: absolute;
+  inset-inline-start: 1rem;
+  inset-block-start: -0.05rem;
+  transition: rotate 0.3s;
+}
+
+details[open] summary::before {
+  rotate: 90deg;
+  inset-block-start: 0.05rem;
+}
+
+/* END OF THIS IS SO FUCKING COOL */
