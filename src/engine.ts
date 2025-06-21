@@ -160,7 +160,11 @@ export async function generateImage(
 }
 
 export function getFavoredStyles(tasteProfile: Record<string, number>) {
-  return Object.entries(tasteProfile)
-    .filter(([_, score]) => score > 3.5)
-    .map(([style, score]) => ({ [style]: score }));
+  return (
+    Object.entries(tasteProfile)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      // .filter(([_, score]) => score > 3.5)
+      .map(([style, score]) => ({ [style]: score }))
+  );
 }

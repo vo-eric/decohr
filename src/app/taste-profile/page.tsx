@@ -71,7 +71,7 @@ export default function Page() {
           <h1 className="text-4xl font-bold">Your Taste Profile</h1>
           {user?.tasteProfile ? (
             <>
-              <p className="h-full max-h-[50vh] overflow-scroll leading-relaxed">
+              <p className="h-full max-h-[100%] overflow-scroll leading-relaxed">
                 {tasteProfile}
               </p>
               <button
