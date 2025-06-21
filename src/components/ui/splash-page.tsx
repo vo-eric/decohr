@@ -4,7 +4,7 @@ export default function SplashPage() {
   return (
     <div className="flex w-[60%] flex-col gap-10">
       <h1 className="flex items-end text-6xl font-thin">
-        decoh
+        deco
         <House className="size-14" />r
       </h1>
       <section>
