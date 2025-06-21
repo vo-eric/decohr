@@ -33,7 +33,6 @@ export function ImageRatingPage({ userId }: { userId: string }) {
     imageId: string,
     isLiked: boolean,
   ) {
-    console.log("handleClick", userId);
     recordResponse.mutate({ userId, imageId, isLiked });
     updateUserLikes.mutate({ userId, imageId, isLiked });
 
@@ -54,9 +53,41 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   if (!image) {
     return <div>No image found</div>;
   }
+
+  /*
+
+
+  <details>
+  <summary>Click to reveal more information</summary>
+  <p>This is the block of text that appears when you click the summary.</p>
+  <ul>
+    <li>Item 1</li>
+    <li>Item 2</li>
+    <li>Item 3</li>
+  </ul>
+</details>
+
+  */
+
   return (
-    <>
-      <div className="relative flex h-[60vh] w-[60%] items-center justify-center overflow-hidden rounded-xl bg-[#87bba2]/20">
+    <div className="grid h-[60vh] w-[60%] grid-cols-3 gap-4">
+      <div className="col-span-1">
+        <div className="bg-col flex flex-col gap-2">
+          {image.styles.map((style) => {
+            return (
+              <details key={style.style} name="style">
+                <summary>{style.style}</summary>
+                <ul>
+                  {style.elements.map((element) => {
+                    return <li key={element}>{element}</li>;
+                  })}
+                </ul>
+              </details>
+            );
+          })}
+        </div>
+      </div>
+      <div className="relative col-span-2 items-center justify-center overflow-hidden rounded-xl bg-[#87bba2]/20">
         <Image
           src={image.imageUrl}
           alt={image.styles[0]!.style}
@@ -66,27 +97,27 @@ export function ImageRatingPage({ userId }: { userId: string }) {
           fill
           className="object-contain"
         />
+        <div className="absolute bottom-0 left-[50%] z-3 flex w-[20%] translate-[-50%] justify-between">
+          <button
+            className="cursor-pointer"
+            onClick={() => handleClick(user?.id ?? "", image.id, false)}
+          >
+            <HeartOff
+              size={36}
+              className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-black"
+            />
+          </button>
+          <button
+            className="cursor-pointer"
+            onClick={() => handleClick(user?.id ?? "", image.id, true)}
+          >
+            <Heart
+              size={36}
+              className="text-[#3b6064] transition duration-300 hover:rotate-35 hover:text-red-500"
+            />
+          </button>
+        </div>
       </div>
-      <div className="flex w-[20%] justify-between">
-        <button
-          className="cursor-pointer"
-          onClick={() => handleClick(user?.id ?? "", image.id, false)}
-        >
-          <HeartOff
-            size={36}
-            className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-black"
-          />
-        </button>
-        <button
-          className="cursor-pointer"
-          onClick={() => handleClick(user?.id ?? "", image.id, true)}
-        >
-          <Heart
-            size={36}
-            className="text-[#3b6064] transition duration-300 hover:rotate-35 hover:text-red-500"
-          />
-        </button>
-      </div>
-    </>
+    </div>
   );
 }
