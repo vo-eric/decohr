@@ -183,3 +183,7 @@ details[open] summary::before {
 }
 
 /* END OF THIS IS SO FUCKING COOL */
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}

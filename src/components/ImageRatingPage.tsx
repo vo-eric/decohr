@@ -22,10 +22,6 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   const analyzeTasteProfile = trpc.users.analyzeTasteProfile.useMutation({
     onSuccess: () => {
       toast.success("Taste profile generated!");
-
-      setTimeout(() => {
-        router.push("/taste-profile");
-      }, 1000);
     },
   });
   const { data: likes } = trpc.likes.getLikesCount.useQuery(userId);
@@ -77,19 +73,31 @@ export function ImageRatingPage({ userId }: { userId: string }) {
           )}
         >
           <div className={clsx("flex items-center justify-center gap-2")}>
-            {user?.tasteProfile
-              ? "Regenerate your taste profile"
-              : "Ready to generate your taste profile?"}
-            <button
-              className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
-              onClick={handleGenerateClick}
-            >
-              {analyzeTasteProfile.isPending
-                ? "Generating..."
-                : user?.tasteProfile
-                  ? "Regenerate"
-                  : "Generate"}
-            </button>
+            {analyzeTasteProfile.isSuccess
+              ? "Your taste profile is ready!"
+              : user?.tasteProfile
+                ? "Regenerate your taste profile"
+                : "Ready to generate your taste profile?"}
+
+            {analyzeTasteProfile.isSuccess ? (
+              <button
+                className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
+                onClick={() => router.push("/taste-profile")}
+              >
+                Go to your taste profile
+              </button>
+            ) : (
+              <button
+                className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
+                onClick={handleGenerateClick}
+              >
+                {analyzeTasteProfile.isPending
+                  ? "Generating..."
+                  : user?.tasteProfile
+                    ? "Regenerate"
+                    : "Generate"}
+              </button>
+            )}
           </div>
         </div>
       </div>
