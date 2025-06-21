@@ -22,7 +22,10 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   const analyzeTasteProfile = trpc.users.analyzeTasteProfile.useMutation({
     onSuccess: () => {
       toast.success("Taste profile generated!");
-      router.push("/taste-profile");
+
+      setTimeout(() => {
+        router.push("/taste-profile");
+      }, 1000);
     },
   });
   const { data: likes } = trpc.likes.getLikesCount.useQuery(userId);
