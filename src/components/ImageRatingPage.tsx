@@ -6,9 +6,10 @@ import { Heart, HeartOff } from "lucide-react";
 import { trpc } from "~/app/_trpc/client";
 import clsx from "clsx";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export function ImageRatingPage({ userId }: { userId: string }) {
+  const router = useRouter();
   const { data: user } = trpc.users.getUser.useQuery({ userId });
 
   const { data: images, isPending } = trpc.images.getImages.useQuery(userId);
@@ -21,7 +22,7 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   const analyzeTasteProfile = trpc.users.analyzeTasteProfile.useMutation({
     onSuccess: () => {
       toast.success("Taste profile generated!");
-      redirect("/taste-profile");
+      router.push("/taste-profile");
     },
   });
   const { data: likes } = trpc.likes.getLikesCount.useQuery(userId);
