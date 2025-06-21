@@ -6,6 +6,7 @@ import { Heart, HeartOff } from "lucide-react";
 import { trpc } from "~/app/_trpc/client";
 import clsx from "clsx";
 import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 export function ImageRatingPage({ userId }: { userId: string }) {
   const { data: user } = trpc.users.getUser.useQuery({ userId });
@@ -20,6 +21,7 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   const analyzeTasteProfile = trpc.users.analyzeTasteProfile.useMutation({
     onSuccess: () => {
       toast.success("Taste profile generated!");
+      redirect("/taste-profile");
     },
   });
   const { data: likes } = trpc.likes.getLikesCount.useQuery(userId);
@@ -59,9 +61,6 @@ export function ImageRatingPage({ userId }: { userId: string }) {
     return <div>No image found</div>;
   }
 
-  console.log("recordResponse.data", recordResponse.data);
-  console.log("likes", likes);
-
   return (
     <div className="grid h-[60vh] w-[60%] grid-cols-3 grid-rows-[40px_1fr] gap-4">
       <div className="col-span-3 h-[60px]">
@@ -74,12 +73,14 @@ export function ImageRatingPage({ userId }: { userId: string }) {
           )}
         >
           <div className={clsx("flex items-center justify-center gap-2")}>
-            Ready to generate your taste profile?{" "}
+            {user?.tasteProfile
+              ? "Regenerate your taste profile"
+              : "Ready to generate your taste profile?"}
             <button
               className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
               onClick={handleGenerateClick}
             >
-              Generate
+              {user?.tasteProfile ? "Regenerate" : "Generate"}
             </button>
           </div>
         </div>
@@ -117,7 +118,7 @@ export function ImageRatingPage({ userId }: { userId: string }) {
           >
             <HeartOff
               size={36}
-              className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-black"
+              className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-[#87bba2]"
             />
           </button>
           <button
