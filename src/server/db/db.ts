@@ -111,12 +111,15 @@ export class DecohrAPI {
         (updatedLikes[style.style] ?? 0) + 1 * style.confidence;
     }
 
-    await this.db
+    const updatedUser = await this.db
       .update(user)
       .set({
         likes: updatedLikes,
       })
-      .where(eq(user.id, userId));
+      .where(eq(user.id, userId))
+      .returning();
+
+    return updatedUser[0];
   }
 
   async addImageProfile(results: ImageResult[]) {

@@ -4,6 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { Heart, HeartOff } from "lucide-react";
 import { trpc } from "~/app/_trpc/client";
+import clsx from "clsx";
+import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 export function ImageRatingPage({ userId }: { userId: string }) {
   const { data: user } = trpc.users.getUser.useQuery({ userId });
@@ -15,6 +18,13 @@ export function ImageRatingPage({ userId }: { userId: string }) {
     },
   });
   const updateUserLikes = trpc.users.updateUserLikes.useMutation();
+  const analyzeTasteProfile = trpc.users.analyzeTasteProfile.useMutation({
+    onSuccess: () => {
+      toast.success("Taste profile generated!");
+      redirect("/taste-profile");
+    },
+  });
+  const { data: likes } = trpc.likes.getLikesCount.useQuery(userId);
   /*
 
   For now, just put the image results in a map where the key is the id and the value is the whole result
@@ -22,7 +32,6 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   Later, enforce interaction with the image by either setting it to the user liking an image or not
     Only display images that have not been rated yet
     
-
   */
 
   const [index, setIndex] = useState(0);
@@ -35,15 +44,13 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   ) {
     recordResponse.mutate({ userId, imageId, isLiked });
     updateUserLikes.mutate({ userId, imageId, isLiked });
+  }
 
-    //TODO
-    //if image is near the end the array, fetch more images
-
-    // if (index === images.length - 5) {
-    //   const response = await fetch("/api/images");
-    //   const newImages = await response.json();
-    //   setImages((prev) => [...prev, ...newImages]);
-    // }
+  async function handleGenerateClick() {
+    if (recordResponse.data && recordResponse.data < 5) {
+      return;
+    }
+    analyzeTasteProfile.mutate({ userId: user?.id ?? "" });
   }
 
   if (isPending) {
@@ -54,23 +61,30 @@ export function ImageRatingPage({ userId }: { userId: string }) {
     return <div>No image found</div>;
   }
 
-  /*
-
-
-  <details>
-  <summary>Click to reveal more information</summary>
-  <p>This is the block of text that appears when you click the summary.</p>
-  <ul>
-    <li>Item 1</li>
-    <li>Item 2</li>
-    <li>Item 3</li>
-  </ul>
-</details>
-
-  */
-
   return (
-    <div className="grid h-[60vh] w-[60%] grid-cols-3 gap-4">
+    <div className="grid h-[60vh] w-[80%] grid-cols-3 grid-rows-[40px_1fr] gap-4">
+      <div className="col-span-3 h-[60px]">
+        <div
+          className={clsx(
+            (recordResponse.data && recordResponse.data >= 5) ||
+              (likes && likes >= 5)
+              ? "block"
+              : "hidden",
+          )}
+        >
+          <div className={clsx("flex items-center justify-center gap-2")}>
+            {user?.tasteProfile
+              ? "Regenerate your taste profile"
+              : "Ready to generate your taste profile?"}
+            <button
+              className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
+              onClick={handleGenerateClick}
+            >
+              {user?.tasteProfile ? "Regenerate" : "Generate"}
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="col-span-1">
         <div className="bg-col flex flex-col gap-2">
           {image.styles.map((style) => {
@@ -104,7 +118,7 @@ export function ImageRatingPage({ userId }: { userId: string }) {
           >
             <HeartOff
               size={36}
-              className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-black"
+              className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-[#87bba2]"
             />
           </button>
           <button
