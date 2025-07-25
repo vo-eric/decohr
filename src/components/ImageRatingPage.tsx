@@ -105,7 +105,7 @@ export function ImageRatingPage({ userId }: { userId: string }) {
         <div className="bg-col flex flex-col gap-2">
           {image.styles.map((style) => {
             return (
-              <details key={style.style} name="style">
+              <details key={style.style}>
                 <summary>{style.style}</summary>
                 <ul>
                   {style.elements.map((element) => {
