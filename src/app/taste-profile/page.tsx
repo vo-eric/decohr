@@ -6,7 +6,6 @@ import Image from "next/image";
 import clsx from "clsx";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useSession } from "~/lib/auth-client";
-import ImageSkeleton from "~/components/image-skeleton";
 import TextSkeleton from "~/components/ui/text-skeleton";
 
 export default function Page() {
@@ -71,9 +70,13 @@ export default function Page() {
           <h1 className="text-4xl font-bold">Your Taste Profile</h1>
           {user?.tasteProfile ? (
             <>
-              <p className="hide-scrollbar h-full overflow-scroll leading-relaxed">
-                {tasteProfile}
-              </p>
+              <div className="hide-scrollbar h-full overflow-scroll leading-relaxed">
+                {tasteProfile?.split("\n\n").map((paragraph, index) => (
+                  <p key={index} className="mb-4 last:mb-0">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
               <button
                 className={clsx(
                   "mt-auto cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#42656c]",
@@ -107,9 +110,7 @@ export default function Page() {
                   isTransitioning ? "opacity-0" : "opacity-100",
                 )}
               />
-            ) : (
-              <ImageSkeleton />
-            )}
+            ) : null}
             {generatedImages && generatedImages.length > 1 && (
               <>
                 <button
