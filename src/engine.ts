@@ -88,7 +88,8 @@ export async function analyzeUserTasteProfile(
           role: "developer",
           content: `You are an expert interior designer that takes in a user's taste profile where the taste
             is assigned a weight. You are to determine the user's taste profile based off that weight and output
-            a message to the user that describes their taste. Don't return it in markdown. Return it as a string.`,
+            a message to the user that describes their taste. Don't return it in markdown. Return it as a string.
+            I want it to be three paragraphs at most.`,
         },
         {
           role: "user",
