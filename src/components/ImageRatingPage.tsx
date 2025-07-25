@@ -127,23 +127,23 @@ export function ImageRatingPage({ userId }: { userId: string }) {
           fill
           className="object-contain"
         />
-        <div className="absolute bottom-0 left-[50%] z-3 flex w-[20%] translate-[-50%] justify-between">
+        <div className="absolute bottom-4 left-[50%] z-10 flex w-[40%] translate-x-[-50%] justify-between">
           <button
-            className="cursor-pointer"
+            className="cursor-pointer rounded-full bg-white/70 p-2 shadow-lg backdrop-blur-sm transition duration-300 hover:bg-white/90 hover:shadow-xl"
             onClick={() => handleClick(user?.id ?? "", image.id, false)}
           >
             <HeartOff
               size={36}
-              className="text-[#3b6064] transition duration-300 hover:-rotate-35 hover:text-[#87bba2]"
+              className="text-[#3b6064] transition duration-300 hover:-rotate-12 hover:text-[#87bba2]"
             />
           </button>
           <button
-            className="cursor-pointer"
+            className="cursor-pointer rounded-full bg-white/70 p-2 shadow-lg backdrop-blur-sm transition duration-300 hover:bg-white/90 hover:shadow-xl"
             onClick={() => handleClick(user?.id ?? "", image.id, true)}
           >
             <Heart
               size={36}
-              className="text-[#3b6064] transition duration-300 hover:rotate-35 hover:text-red-500"
+              className="text-[#3b6064] transition duration-300 hover:rotate-12 hover:text-red-500"
             />
           </button>
         </div>
