@@ -11,10 +11,15 @@ export default function NavBar() {
 
   return (
     <nav className="fixed flex w-full items-center justify-between bg-[#87bba2] px-6 py-2">
-      <Link className="flex h-full items-center text-xl" href="/">
-        deco
-        <House />r
-      </Link>
+      <div className="flex h-full items-center gap-7">
+        <Link className="flex h-full items-center text-xl" href="/">
+          deco
+          <House />r
+        </Link>
+        <Link href="/taste-profile" className="font-semibold">
+          Your taste profile
+        </Link>
+      </div>
       {
         <div className="flex h-full items-center gap-3">
           {session && <p>Hi, {user?.name.split(" ")[0]}</p>}
