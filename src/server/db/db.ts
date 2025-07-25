@@ -26,7 +26,11 @@ export interface User {
 export class DecohrAPI {
   private db = drizzle(process.env.DATABASE_URL!);
 
-  async getImageProfiles(userId: string): Promise<ImageResult[]> {
+  async getImageProfiles(
+    userId: string,
+    limit = 10,
+    offset = 0,
+  ): Promise<ImageResult[]> {
     const unseenImages = await this.db
       .select({
         id: imageProfiles.id,
@@ -45,7 +49,9 @@ export class DecohrAPI {
               .where(eq(likes.userId, userId)),
           ),
         ),
-      );
+      )
+      .limit(limit)
+      .offset(offset);
 
     //NOTE: i hate this. fix it.
     const images = unseenImages.map((image) => ({

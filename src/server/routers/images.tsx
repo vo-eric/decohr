@@ -6,10 +6,22 @@ import { generateImage } from "~/engine";
 const api = new DecohrAPI();
 
 export const imageRouter = router({
-  getImages: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const images = await api.getImageProfiles(input);
-    return images;
-  }),
+  getImages: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        limit: z.number().default(10),
+        offset: z.number().default(0),
+      }),
+    )
+    .query(async ({ input }) => {
+      const images = await api.getImageProfiles(
+        input.userId,
+        input.limit,
+        input.offset,
+      );
+      return images;
+    }),
   getGeneratedImages: publicProcedure
     .input(z.string())
     .query(async ({ input }) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { Heart, HeartOff } from "lucide-react";
 import { trpc } from "~/app/_trpc/client";
@@ -12,7 +12,17 @@ export function ImageRatingPage({ userId }: { userId: string }) {
   const router = useRouter();
   const { data: user } = trpc.users.getUser.useQuery({ userId });
 
-  const { data: images, isPending } = trpc.images.getImages.useQuery(userId);
+  const [offset, setOffset] = useState(0);
+  const [allImages, setAllImages] = useState<NonNullable<typeof images>>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const processedOffsets = useRef<Set<number>>(new Set());
+
+  const { data: images, isPending } = trpc.images.getImages.useQuery({
+    userId,
+    limit: 10,
+    offset,
+  });
+
   const recordResponse = trpc.likes.recordImageResponse.useMutation({
     onSuccess: () => {
       setIndex((prev) => prev + 1);
@@ -25,17 +35,84 @@ export function ImageRatingPage({ userId }: { userId: string }) {
     },
   });
   const { data: likes } = trpc.likes.getLikesCount.useQuery(userId);
-  /*
-
-  For now, just put the image results in a map where the key is the id and the value is the whole result
-
-  Later, enforce interaction with the image by either setting it to the user liking an image or not
-    Only display images that have not been rated yet
-    
-  */
 
   const [index, setIndex] = useState(0);
-  const image = images?.[index];
+
+  useEffect(() => {
+    if (processedOffsets.current.has(offset)) {
+      return;
+    }
+
+    if (images && images.length > 0) {
+      processedOffsets.current.add(offset);
+
+      setAllImages((prev) => {
+        const newImages = images.filter(
+          (newImg) => !prev.some((existingImg) => existingImg.id === newImg.id),
+        );
+        return [...prev, ...newImages];
+      });
+    }
+
+    if (images && images.length < 10) {
+      setHasMore(false);
+    }
+  }, [images]);
+
+  useEffect(() => {
+    if (index >= allImages.length - 5 && hasMore && !isPending) {
+      setOffset((prev) => prev + 10);
+    }
+  }, [index, allImages.length, hasMore, isPending, offset]);
+
+  const image = allImages[index];
+
+  const tasteProfileSection = useMemo(() => {
+    const hasRatedEnough =
+      (recordResponse.data && recordResponse.data >= 5) ??
+      (likes && likes >= 5);
+
+    if (!hasRatedEnough) {
+      return null;
+    }
+
+    return (
+      <div className={clsx("flex items-center justify-center gap-2")}>
+        {analyzeTasteProfile.isSuccess
+          ? "Your taste profile is ready!"
+          : user?.tasteProfile
+            ? "Regenerate your taste profile"
+            : "Ready to generate your taste profile?"}
+
+        {analyzeTasteProfile.isSuccess ? (
+          <button
+            className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
+            onClick={() => router.push("/taste-profile")}
+          >
+            Go to your taste profile
+          </button>
+        ) : (
+          <button
+            className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
+            onClick={handleGenerateClick}
+          >
+            {analyzeTasteProfile.isPending
+              ? "Generating..."
+              : user?.tasteProfile
+                ? "Regenerate"
+                : "Generate"}
+          </button>
+        )}
+      </div>
+    );
+  }, [
+    recordResponse.data,
+    likes,
+    analyzeTasteProfile.isSuccess,
+    analyzeTasteProfile.isPending,
+    user?.tasteProfile,
+    router,
+  ]);
 
   async function handleClick(
     userId: string,
@@ -45,7 +122,7 @@ export function ImageRatingPage({ userId }: { userId: string }) {
     recordResponse.mutate({ userId, imageId, isLiked });
     updateUserLikes.mutate({ userId, imageId, isLiked });
   }
-
+  console.log("images", images);
   async function handleGenerateClick() {
     if (recordResponse.data && recordResponse.data < 5) {
       return;
@@ -53,54 +130,17 @@ export function ImageRatingPage({ userId }: { userId: string }) {
     analyzeTasteProfile.mutate({ userId: user?.id ?? "" });
   }
 
-  if (isPending) {
+  if (isPending && allImages.length === 0) {
     return <div>Fetching images...</div>;
   }
 
   if (!image) {
-    return <div>No image found</div>;
+    return <div>No more images available</div>;
   }
 
   return (
     <div className="grid h-[60vh] w-[80%] grid-cols-3 grid-rows-[40px_1fr] gap-4">
-      <div className="col-span-3 h-[60px]">
-        <div
-          className={clsx(
-            (recordResponse.data && recordResponse.data >= 5) ||
-              (likes && likes >= 5)
-              ? "block"
-              : "hidden",
-          )}
-        >
-          <div className={clsx("flex items-center justify-center gap-2")}>
-            {analyzeTasteProfile.isSuccess
-              ? "Your taste profile is ready!"
-              : user?.tasteProfile
-                ? "Regenerate your taste profile"
-                : "Ready to generate your taste profile?"}
-
-            {analyzeTasteProfile.isSuccess ? (
-              <button
-                className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
-                onClick={() => router.push("/taste-profile")}
-              >
-                Go to your taste profile
-              </button>
-            ) : (
-              <button
-                className="cursor-pointer rounded-md bg-[#55828b] p-2 text-white transition duration-300 hover:bg-[#55828b]/80"
-                onClick={handleGenerateClick}
-              >
-                {analyzeTasteProfile.isPending
-                  ? "Generating..."
-                  : user?.tasteProfile
-                    ? "Regenerate"
-                    : "Generate"}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <div className="col-span-3 h-[60px]">{tasteProfileSection}</div>
       <div className="col-span-1">
         <div className="bg-col flex flex-col gap-2">
           {image.styles.map((style) => {
