@@ -1,16 +1,10 @@
 # decohr
 
-Steps:
+what it is
 
-- [] Source images to be processed by the LLM
-- [] Have the LLM process the images, generate JSON with relevant data
-  - include image url
-- [] Put that data into a DB table
-- [] Develop frontend that allows users to select what images they like
-- [] Have the LLM develop a taste profile based on their likes and dislikes
-- [] Output that taste profile
-
-Stretch goals:
-
-- [] Create a floor plan generator that accepts user inputs
-  - generates JSON to be used in Konva
+ decohr is a tool that helps you find the perfect home decor for your space. at the moment, it is a tool that will help you determine your taste profile and generate images based your profile.
+  how it works
+  
+* you will be shown a series of images and you can either like or dislike them.
+* once you hit five images you can generate your taste profile, which will be determined based off the top three styles you like the most.
+* generate images based off your taste profile to get some inspiration of what your space will look like.
